@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'org.example.GetBuildInfo'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.seleniumhq.selenium:selenium-java:4.10.0'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+run {
+    jvmArgs '-Xmx1024m'
+}
+
+task copyResources(type: Copy) {
+    from 'src/main/resources'
+    into "$buildDir/resources/main"
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.example.GetBuildInfo'
+        )
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from('src/main/resources') {
+        include '**/*'
+    }
+}
+
+processResources.dependsOn(copyResources)
